@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="ds-styles.css">
+<style>
+  body { background: #e6d8bf; margin: 0; }
+  a { color: #8c491a; }
+  a:hover { color: #c67139; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#e6d8bf; display:flex; justify-content:center; font-family:'Figtree', system-ui, sans-serif; color:#201e1d;">
+<div style="width:100%; max-width:460px; background:#f5ead8; min-height:100vh; position:relative; box-shadow:0 0 40px rgba(46,43,37,0.12);">
+
+  <sc-if value="{{ isShop }}" hint-placeholder-val="{{ true }}">
+  <div style="padding:26px 22px 140px;">
+
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:26px;">
+      <div style="font-family: 'Caprasimo', serif; font-size: 34px; line-height: 1; color: var(--color-accent-500)">forti &amp; co.</div>
+      <div onClick="{{ goQueue }}" role="button" tabindex="0" style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:#8c491a; cursor:pointer; padding:8px 4px;">บาริสต้า · Barista</div>
+    </div>
+
+    <div style="background:#ebddc5; border-radius:32px; padding:24px 22px; margin-bottom:28px;">
+      <div style="font-family:'Caprasimo', serif; font-size:30px; line-height:1.1; margin-bottom:10px;">Made to order</div>
+      <div style="font-size: 14px; line-height: 1.6; opacity: 0.75; font-family: Lato">Made one cup at a time. Fresh beans from northern Thailand.</div>
+      <div style="display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;">
+        <span style="background:#f0fae1; color:#3d472b; font-size:11px; padding:5px 12px; border-radius:999px;">&nbsp;hand delivered</span>
+        <span style="background:#fff2eb; color:#643312; font-size:11px; padding:5px 12px; border-radius:999px;">45฿</span>
+      </div>
+    </div>
+
+    <div style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.5; margin-bottom:12px;">เมนู · Menu</div>
+
+    <div style="background:#ebddc5; border-radius:32px; padding:22px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+        <div style="font-family:'Caprasimo', serif; font-size:22px;">Black coffee</div>
+        <div style="font-family:'Caprasimo', serif; font-size:22px; color:#8c491a;">45฿</div>
+      </div>
+      <div style="font-size: 13px; opacity: 0.65; margin-bottom: 20px; font-family: Lato">Choose your brew and beans.</div>
+
+      <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.55; margin-bottom:8px;">วิธีชง · Brew</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+        <sc-for list="{{ brews }}" as="b" hint-placeholder-count="2">
+          <div onClick="{{ b.onPick }}" role="button" tabindex="0" style="{{ b.style }}">
+            <div style="font-size: 16px; opacity: 0.7; color: #201E1D">{{ b.en }}</div><div style="font-family: Bebas Neue; font-size: 12px; color: var(--color-accent-900)">{{ b.th }}</div>
+            
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.55; margin-bottom:8px;">เมล็ดกาแฟ · Beans</div>
+      <div style="display:grid; gap:10px; margin-bottom:22px;">
+        <sc-for list="{{ beans }}" as="n" hint-placeholder-count="2">
+          <div onClick="{{ n.onPick }}" role="button" tabindex="0" style="{{ n.style }}">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+              <div style="font-size: 16px; opacity: 0.6">{{ n.en }}</div><div style="font-family: 'Caprasimo', serif; font-size: 12px; color: #594A42">{{ n.th }}</div>
+              
+            </div>
+            <div style="font-size:12px; opacity:0.7; margin-top:4px;">{{ n.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <button onClick="{{ addToCart }}" style="width:100%; min-height:52px; border:none; border-radius:999px; background:#c67139; color:#f5ead8; font-family:'Caprasimo', serif; font-size:16px; cursor:pointer;" style-hover="background:#b2622d" style-active="background:#8c491a">เพิ่มลงออเดอร์ · Add to order</button>
+    </div>
+
+    <div style="display:grid; gap:10px; margin-bottom:28px;">
+      <sc-for list="{{ soon }}" as="s" hint-placeholder-count="3">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; border-radius:24px; border:1px dashed rgba(32,30,29,0.2); opacity:0.6;">
+          <div>
+            <div style="font-family:'Caprasimo', serif; font-size:16px;">{{ s.th }}</div>
+            <div style="font-size:12px; opacity:0.7;">{{ s.en }}</div>
+          </div>
+          <span style="background:#eee7db; color:#474238; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; padding:5px 11px; border-radius:999px; white-space:nowrap;">เร็วๆ นี้ · soon</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:11px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.5; margin-bottom:12px;">ออเดอร์ของคุณ · Your order</div>
+      <div style="background:#ebddc5; border-radius:32px; padding:20px 22px; margin-bottom:16px; display:grid; gap:14px;">
+        <sc-for list="{{ cart }}" as="c" hint-placeholder-count="1">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="flex:1;">
+              <div style="font-family:'Caprasimo', serif; font-size:15px;">{{ c.title }}</div>
+              <div style="font-size:12px; opacity:0.6;">{{ c.sub }}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <button onClick="{{ c.dec }}" style="width:34px; height:34px; border-radius:999px; border:1px solid rgba(32,30,29,0.16); background:transparent; font-size:18px; line-height:1; cursor:pointer; color:#201e1d;" style-hover="background:rgba(32,30,29,0.07)">−</button>
+              <div style="min-width:20px; text-align:center; font-size:15px;">{{ c.qty }}</div>
+              <button onClick="{{ c.inc }}" style="width:34px; height:34px; border-radius:999px; border:1px solid rgba(32,30,29,0.16); background:transparent; font-size:18px; line-height:1; cursor:pointer; color:#201e1d;" style-hover="background:rgba(32,30,29,0.07)">+</button>
+            </div>
+            <div style="width:52px; text-align:right; font-size:15px;">{{ c.line }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid; gap:14px; margin-bottom:18px;">
+        <div>
+          <label style="display:block; font-size:12px; opacity:0.7; margin-bottom:6px;">ชื่อ · Your name</label>
+          <input value="{{ name }}" onChange="{{ onName }}" style="width:100%; min-height:48px; padding:6px 16px; font-family:inherit; font-size:15px; color:#201e1d; background:#ebddc5; border:1px solid rgba(32,30,29,0.16); border-radius:999px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; opacity:0.7; margin-bottom:6px;">ถึงบาริสต้า · Note to barista</label>
+          <textarea value="{{ note }}" onChange="{{ onNote }}" placeholder="หวานน้อย/ เพิ่มช๊อต" style="width:100%; min-height:84px; padding:12px 16px; font-family:inherit; font-size:15px; color:#201e1d; background:#ebddc5; border:1px solid rgba(32,30,29,0.16); border-radius:24px; resize:vertical;"></textarea>
+        </div>
+      </div>
+
+      <div style="font-size:12px; opacity:0.7; margin-bottom:8px;">ชำระเงิน · Payment</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <sc-for list="{{ pays }}" as="p" hint-placeholder-count="2">
+          <div onClick="{{ p.onPick }}" role="button" tabindex="0" style="{{ p.style }}">
+            <div style="font-family:'Caprasimo', serif; font-size:15px;">{{ p.th }}</div>
+            <div style="font-size:12px; opacity:0.7;">{{ p.en }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center; font-size:13px; opacity:0.5; padding:8px 0 4px;">ยังไม่มีรายการ · nothing in your order yet</div>
+    </sc-if>
+  </div>
+
+  <div style="position:fixed; bottom:0; width:100%; max-width:460px; padding:14px 22px 20px; background:linear-gradient(to top, #f5ead8 72%, rgba(245,234,216,0)); display:flex; align-items:center; gap:14px;">
+    <div style="flex:1;">
+      <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.5;">รวม · Total</div>
+      <div style="font-family:'Caprasimo', serif; font-size:24px; line-height:1.1;">{{ totalLabel }}</div>
+    </div>
+    <button onClick="{{ placeOrder }}" disabled="{{ cantOrder }}" style="{{ orderBtnStyle }}">สั่งเลย · Place order</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isConfirm }}" hint-placeholder-val="{{ false }}">
+  <div style="padding:26px 22px 40px; min-height:100vh; display:flex; flex-direction:column;">
+    <div style="font-family:'Caprasimo', serif; font-size:34px; line-height:1; margin-bottom:26px;">forti.</div>
+    <div style="width:64px; height:64px; border-radius:999px; background:#7a8a5e; color:#f5ead8; display:grid; place-items:center; font-family:'Caprasimo', serif; font-size:28px; margin-bottom:18px;">✓</div>
+    <div style="font-family:'Caprasimo', serif; font-size:26px; margin-bottom:6px;">รับออเดอร์แล้ว!</div>
+    <div style="font-size:14px; opacity:0.7; margin-bottom:24px;">Got it, {{ doneName }} — I'm making it now. Order <strong>{{ doneCode }}</strong>.</div>
+
+    <div style="background:#ebddc5; border-radius:32px; padding:20px 22px; margin-bottom:20px; display:grid; gap:10px;">
+      <sc-for list="{{ doneItems }}" as="d" hint-placeholder-count="1">
+        <div style="display:flex; justify-content:space-between; gap:12px; font-size:14px;">
+          <div>{{ d.label }}</div>
+          <div style="opacity:0.7;">{{ d.line }}</div>
+        </div>
+      </sc-for>
+      <div style="height:1px; background:rgba(32,30,29,0.14);"></div>
+      <div style="display:flex; justify-content:space-between; font-family:'Caprasimo', serif; font-size:18px;">
+        <div>รวม · Total</div>
+        <div>{{ doneTotal }}</div>
+      </div>
+    </div>
+
+    <sc-if value="{{ payQr }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#ebddc5; border-radius:32px; padding:22px; text-align:center; margin-bottom:20px;">
+        <div style="font-family:'Caprasimo', serif; font-size:18px; margin-bottom:4px;">สแกนจ่าย · Scan to pay</div>
+        <div style="font-size:12px; opacity:0.65; margin-bottom:16px;">PromptPay · {{ doneTotal }}</div>
+        <img src="uploads/IMG_3879.JPG" alt="PromptPay QR" style="width:216px; height:216px; object-fit:contain; display:block; margin:0 auto; border-radius:24px; background:#ffffff; padding:12px;">
+      </div>
+    </sc-if>
+    <sc-if value="{{ payCash }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#f0fae1; color:#3d472b; border-radius:32px; padding:20px 22px; margin-bottom:20px;">
+        <div style="font-family:'Caprasimo', serif; font-size:18px; margin-bottom:4px;">จ่ายเงินสด · Pay cash</div>
+        <div style="font-size:13px; opacity:0.8;">Hand me {{ doneTotal }} when I bring your coffee over.</div>
+      </div>
+    </sc-if>
+
+    <button onClick="{{ backToShop }}" style="width:100%; min-height:52px; border:none; border-radius:999px; background:#c67139; color:#f5ead8; font-family:'Caprasimo', serif; font-size:16px; cursor:pointer; margin-top:auto;" style-hover="background:#b2622d">สั่งอีกแก้ว · Order another</button>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ false }}">
+  <div style="padding:26px 22px 40px;">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:22px;">
+      <div style="font-family:'Caprasimo', serif; font-size:26px;">คิววันนี้ · Queue</div>
+      <div onClick="{{ backToShop }}" role="button" tabindex="0" style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:#8c491a; cursor:pointer; padding:8px 4px;">← ร้าน · Shop</div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+      <span style="background:#fff2eb; color:#643312; font-size:12px; padding:6px 14px; border-radius:999px;">{{ countWaiting }} รอชง · to make</span>
+      <span style="background:#f0fae1; color:#3d472b; font-size:12px; padding:6px 14px; border-radius:999px;">{{ countDone }} เสร็จ · done</span>
+    </div>
+
+    <div style="display:grid; gap:12px;">
+      <sc-for list="{{ orders }}" as="o" hint-placeholder-count="2">
+        <div style="{{ o.cardStyle }}">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; gap:10px;">
+            <div style="font-family:'Caprasimo', serif; font-size:18px;">{{ o.name }}</div>
+            <div style="font-family:ui-monospace, monospace; font-size:11px; opacity:0.5;">{{ o.code }} · {{ o.time }}</div>
+          </div>
+          <div style="font-size:14px; margin-top:6px;">{{ o.itemsLabel }}</div>
+          <sc-if value="{{ o.hasNote }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:13px; margin-top:6px; padding:8px 12px; border-radius:16px; background:rgba(32,30,29,0.06); font-style:italic;">“{{ o.note }}”</div>
+          </sc-if>
+          <div style="display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap;">
+            <span style="{{ o.payStyle }}">{{ o.payLabel }}</span>
+            <span style="font-size:13px; opacity:0.65;">{{ o.totalLabel }}</span>
+            <div style="flex:1;"></div>
+            <button onClick="{{ o.advance }}" style="{{ o.btnStyle }}">{{ o.btnLabel }}</button>
+            <button onClick="{{ o.remove }}" style="width:38px; height:38px; border-radius:999px; border:1px solid rgba(32,30,29,0.16); background:transparent; cursor:pointer; font-size:14px; color:#201e1d;" style-hover="background:rgba(32,30,29,0.07)">✕</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ noOrders }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center; font-size:14px; opacity:0.5; padding:40px 0;">ยังไม่มีออเดอร์ · no orders yet</div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:900}}">
+const PRICE = 45;
+const BREWS = [
+  { id: 'drip', th: 'ดริป', en: 'Drip' },
+  { id: 'moka', th: 'มอคค่าพอต', en: 'Moka pot' },
+];
+const BEANS = [
+  { id: 'chiangrai', th: 'เชียงราย', en: 'Chiangrai', note: 'chocolate, nutty' },
+  { id: 'nan', th: 'น่าน', en: 'Nan', note: 'fruity, floral' },
+];
+const PAYS = [
+  { id: 'qr', th: 'สแกน QR', en: 'PromptPay QR' },
+  { id: 'cash', th: 'เงินสด', en: 'Cash' },
+];
+const STATUSES = {
+  new: { label: 'รอชง · New', next: 'making', btn: 'เริ่มชง · Start', bg: '#f9f4ed', bar: '#c67139' },
+  making: { label: 'กำลังชง · Making', next: 'done', btn: 'เสร็จแล้ว · Done', bg: '#fff2eb', bar: '#c67139' },
+  done: { label: 'เสร็จ · Done', next: 'new', btn: 'คืนคิว · Reopen', bg: '#f0fae1', bar: '#7a8a5e' },
+};
+const KEY = 'forti-orders-v1';
+
+const pickStyle = (on, pad) =>
+  'cursor:pointer; padding:' + pad + '; border-radius:24px; text-align:left; ' +
+  'border:1.5px solid ' + (on ? '#c67139' : 'rgba(32,30,29,0.16)') + '; ' +
+  'background:' + (on ? '#fff2eb' : 'transparent') + '; ' +
+  'transition:background 120ms ease, border-color 120ms ease;';
+
+class Component extends DCLogic {
+  state = {
+    view: 'shop', brew: 'drip', bean: 'chiangrai', pay: 'qr',
+    cart: [], name: '', note: '', orders: [], done: null,
+  };
+
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) this.setState({ orders: JSON.parse(raw) });
+    } catch (e) {}
+  }
+
+  save(orders) {
+    this.setState({ orders });
+    try { localStorage.setItem(KEY, JSON.stringify(orders)); } catch (e) {}
+  }
+
+  add = () => {
+    const { brew, bean, cart } = this.state;
+    const key = brew + '-' + bean;
+    const found = cart.find(c => c.key === key);
+    const next = found
+      ? cart.map(c => (c.key === key ? { ...c, qty: c.qty + 1 } : c))
+      : [...cart, { key, brew, bean, qty: 1 }];
+    this.setState({ cart: next });
+  };
+
+  bump(key, d) {
+    const cart = this.state.cart
+      .map(c => (c.key === key ? { ...c, qty: c.qty + d } : c))
+      .filter(c => c.qty > 0);
+    this.setState({ cart });
+  }
+
+  label(c) {
+    const b = BREWS.find(x => x.id === c.brew);
+    const n = BEANS.find(x => x.id === c.bean);
+    return { title: b.th + ' · ' + b.en, sub: 'เมล็ด ' + n.th + ' · ' + n.en + ' beans' };
+  }
+
+  total() { return this.state.cart.reduce((s, c) => s + c.qty * PRICE, 0); }
+
+  place = () => {
+    if (!this.state.cart.length) return;
+    const now = new Date();
+    const order = {
+      id: String(Date.now()),
+      code: '#' + String(100 + (this.state.orders.length % 900)),
+      name: this.state.name.trim() || 'ลูกค้า · Guest',
+      note: this.state.note.trim(),
+      pay: this.state.pay,
+      status: 'new',
+      total: this.total(),
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      items: this.state.cart.map(c => {
+        const l = this.label(c);
+        return { label: l.title + ' / ' + l.sub.split(' · ')[0], short: l.title.split(' · ')[0] + ' ' + BEANS.find(x => x.id === c.bean).th, qty: c.qty, line: c.qty * PRICE + '฿' };
+      }),
+    };
+    this.save([order, ...this.state.orders]);
+    this.setState({ view: 'confirm', done: order, cart: [], name: '', note: '' });
+  };
+
+  renderVals() {
+    const s = this.state;
+    const total = this.total();
+    const done = s.done || { items: [], name: '', code: '', total: 0, pay: 'qr' };
+
+    return {
+      isShop: s.view === 'shop',
+      isConfirm: s.view === 'confirm',
+      isQueue: s.view === 'queue',
+      goQueue: () => this.setState({ view: 'queue' }),
+      backToShop: () => this.setState({ view: 'shop' }),
+
+      brews: BREWS.map(b => ({ ...b, style: pickStyle(s.brew === b.id, '14px 16px'), onPick: () => this.setState({ brew: b.id }) })),
+      beans: BEANS.map(n => ({ ...n, style: pickStyle(s.bean === n.id, '14px 16px'), onPick: () => this.setState({ bean: n.id }) })),
+      pays: PAYS.map(p => ({ ...p, style: pickStyle(s.pay === p.id, '14px 16px'), onPick: () => this.setState({ pay: p.id }) })),
+      addToCart: this.add,
+
+      soon: [
+        { th: 'ลาเต้', en: 'Latte' },
+        { th: 'ช็อกโกแลตเย็น', en: 'Iced chocolate' },
+        { th: 'บราวนี่', en: 'Brownie' },
+      ],
+
+      cart: s.cart.map(c => {
+        const l = this.label(c);
+        return { ...l, qty: c.qty, line: c.qty * PRICE + '฿', inc: () => this.bump(c.key, 1), dec: () => this.bump(c.key, -1) };
+      }),
+      hasItems: s.cart.length > 0,
+      isEmpty: s.cart.length === 0,
+      totalLabel: total + '฿',
+      cantOrder: s.cart.length === 0,
+      orderBtnStyle:
+        'min-height:52px; padding:0 26px; border:none; border-radius:999px; font-family:Caprasimo, serif; font-size:16px; ' +
+        (s.cart.length
+          ? 'background:#c67139; color:#f5ead8; cursor:pointer;'
+          : 'background:#dcd3c4; color:#82796a; cursor:not-allowed;'),
+      placeOrder: this.place,
+
+      name: s.name,
+      note: s.note,
+      onName: e => this.setState({ name: e.target.value }),
+      onNote: e => this.setState({ note: e.target.value }),
+
+      doneName: done.name,
+      doneCode: done.code,
+      doneTotal: done.total + '฿',
+      doneItems: done.items.map(i => ({ label: i.qty + '× ' + i.label, line: i.line })),
+      payQr: done.pay === 'qr',
+      payCash: done.pay === 'cash',
+
+      orders: s.orders.map(o => {
+        const st = STATUSES[o.status];
+        return {
+          ...o,
+          itemsLabel: o.items.map(i => i.qty + '× ' + i.short).join(', '),
+          hasNote: !!o.note,
+          totalLabel: o.total + '฿',
+          payLabel: o.pay === 'qr' ? 'QR' : 'เงินสด · Cash',
+          payStyle: 'font-size:11px; padding:4px 11px; border-radius:999px; background:' +
+            (o.pay === 'qr' ? '#eee7db; color:#474238;' : '#f0fae1; color:#3d472b;'),
+          cardStyle: 'border-radius:28px; padding:18px 20px; background:' + st.bg +
+            '; border-left:5px solid ' + st.bar + '; box-shadow:0 1px 2px rgba(46,43,37,0.14);',
+          btnLabel: st.btn,
+          btnStyle: 'min-height:38px; padding:0 16px; border-radius:999px; border:none; cursor:pointer; ' +
+            'font-family:Caprasimo, serif; font-size:13px; background:' + st.bar + '; color:#f5ead8;',
+          advance: () => this.save(s.orders.map(x => (x.id === o.id ? { ...x, status: st.next } : x))),
+          remove: () => this.save(s.orders.filter(x => x.id !== o.id)),
+        };
+      }),
+      countWaiting: s.orders.filter(o => o.status !== 'done').length,
+      countDone: s.orders.filter(o => o.status === 'done').length,
+      noOrders: s.orders.length === 0,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
