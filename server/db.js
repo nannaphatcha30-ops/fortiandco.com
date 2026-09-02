@@ -1,22 +1,34 @@
-import Database from 'better-sqlite3';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { neon } from '@neondatabase/serverless';
 
-const dbPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'data.sqlite');
+const connectionString =
+  process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.DATABASE_URL_UNPOOLED;
 
-export const db = new Database(dbPath);
-db.pragma('journal_mode = WAL');
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL,
-    name TEXT NOT NULL,
-    note TEXT NOT NULL DEFAULT '',
-    pay TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'new',
-    total INTEGER NOT NULL,
-    items TEXT NOT NULL,
-    created_at TEXT NOT NULL
+if (!connectionString) {
+  throw new Error(
+    'No Postgres connection string found. Set DATABASE_URL (Vercel: add the Neon/Postgres ' +
+      'storage integration in your project dashboard, or run `vercel env pull` for local dev).'
   );
-`);
+}
+
+export const sql = neon(connectionString);
+
+let schemaReady = null;
+
+export function ensureSchema() {
+  if (!schemaReady) {
+    schemaReady = sql`
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        code TEXT NOT NULL,
+        name TEXT NOT NULL,
+        note TEXT NOT NULL DEFAULT '',
+        pay TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'new',
+        total INTEGER NOT NULL,
+        items JSONB NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+    `;
+  }
+  return schemaReady;
+}

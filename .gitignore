@@ -3,3 +3,6 @@ dist/
 server/data.sqlite
 server/data.sqlite-journal
 .DS_Store
+.env
+.env.*
+.vercel
