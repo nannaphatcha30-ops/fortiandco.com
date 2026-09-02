@@ -10,7 +10,9 @@ if (!connectionString) {
   );
 }
 
-export const sql = neon(connectionString);
+// fullResults: true makes sql`...` resolve to { rows, rowCount, ... } like
+// node-postgres/@vercel-postgres, instead of neon's default of a bare rows array.
+export const sql = neon(connectionString, { fullResults: true });
 
 let schemaReady = null;
 
