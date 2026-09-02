@@ -10,8 +10,8 @@ async function request(url, options) {
   return res.json();
 }
 
-export function listOrders() {
-  return request(BASE);
+export function listOrders(baristaPassword) {
+  return request(BASE, { headers: { 'x-barista-password': baristaPassword } });
 }
 
 export function getOrder(id) {
@@ -26,14 +26,17 @@ export function createOrder({ name, note, pay, items }) {
   });
 }
 
-export function updateOrderStatus(id, status) {
+export function updateOrderStatus(id, status, baristaPassword) {
   return request(`${BASE}/${id}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-barista-password': baristaPassword },
     body: JSON.stringify({ status }),
   });
 }
 
-export function deleteOrder(id) {
-  return request(`${BASE}/${id}`, { method: 'DELETE' });
+export function deleteOrder(id, baristaPassword) {
+  return request(`${BASE}/${id}`, {
+    method: 'DELETE',
+    headers: { 'x-barista-password': baristaPassword },
+  });
 }

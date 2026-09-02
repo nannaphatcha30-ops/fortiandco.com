@@ -4,36 +4,97 @@ import { STATUSES } from '../../shared/menu.js';
 import { listOrders, updateOrderStatus, deleteOrder } from '../api.js';
 
 const POLL_MS = 4000;
+const PW_KEY = 'forti-barista-password';
 
 export default function QueuePage() {
+  const [password, setPassword] = useState('');
+  const [authed, setAuthed] = useState(false);
+  const [authError, setAuthError] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
-  const refresh = useCallback(() => {
-    listOrders()
+  const refresh = useCallback((pw) => {
+    listOrders(pw)
       .then((rows) => {
         setOrders(rows);
         setLoaded(true);
+        setAuthed(true);
+        setAuthError(null);
+        sessionStorage.setItem(PW_KEY, pw);
       })
-      .catch(() => {});
+      .catch((e) => {
+        setAuthed(false);
+        setAuthError(e.message || 'wrong password');
+        sessionStorage.removeItem(PW_KEY);
+      });
   }, []);
 
   useEffect(() => {
-    refresh();
-    const timer = setInterval(refresh, POLL_MS);
-    return () => clearInterval(timer);
+    const saved = sessionStorage.getItem(PW_KEY);
+    if (saved) {
+      setPassword(saved);
+      refresh(saved);
+    }
   }, [refresh]);
+
+  useEffect(() => {
+    if (!authed) return;
+    const timer = setInterval(() => refresh(password), POLL_MS);
+    return () => clearInterval(timer);
+  }, [authed, password, refresh]);
+
+  const submitPassword = (e) => {
+    e.preventDefault();
+    refresh(password);
+  };
 
   const advance = (order) => {
     const next = STATUSES[order.status].next;
     setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: next } : o)));
-    updateOrderStatus(order.id, next).then(refresh).catch(refresh);
+    updateOrderStatus(order.id, next, password)
+      .then(() => refresh(password))
+      .catch(() => refresh(password));
   };
 
   const remove = (order) => {
     setOrders((prev) => prev.filter((o) => o.id !== order.id));
-    deleteOrder(order.id).then(refresh).catch(refresh);
+    deleteOrder(order.id, password)
+      .then(() => refresh(password))
+      .catch(() => refresh(password));
   };
+
+  if (!authed) {
+    return (
+      <div className="queue-page">
+        <div className="queue-head">
+          <div className="queue-title">คิววันนี้ · Queue</div>
+          <Link to="/" className="link-btn">
+            ← ร้าน · Shop
+          </Link>
+        </div>
+        <form onSubmit={submitPassword} className="fields">
+          <div>
+            <label className="field-label">รหัสบาริสต้า · Barista password</label>
+            <input
+              type="password"
+              className="field-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoFocus
+            />
+          </div>
+          {authError && (
+            <div className="empty-note" style={{ color: '#b00020', opacity: 1 }}>
+              {authError}
+            </div>
+          )}
+          <button type="submit" className="add-btn">
+            เข้าสู่ระบบ · Enter
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   const countWaiting = orders.filter((o) => o.status !== 'done').length;
   const countDone = orders.filter((o) => o.status === 'done').length;

@@ -13,6 +13,15 @@ app.use(async (req, res, next) => {
   }
 });
 
+function requireBarista(req, res, next) {
+  const expected = process.env.BARISTA_PASSWORD;
+  if (!expected) return res.status(401).json({ error: 'barista password not configured on server' });
+  if (req.get('x-barista-password') !== expected) {
+    return res.status(401).json({ error: 'wrong password' });
+  }
+  next();
+}
+
 function serializeOrder(row) {
   return {
     id: row.id,
@@ -27,7 +36,7 @@ function serializeOrder(row) {
   };
 }
 
-app.get('/api/orders', async (req, res) => {
+app.get('/api/orders', requireBarista, async (req, res) => {
   const { rows } = await sql`SELECT * FROM orders ORDER BY id DESC`;
   res.json(rows.map(serializeOrder));
 });
@@ -74,7 +83,7 @@ app.post('/api/orders', async (req, res) => {
   res.status(201).json(serializeOrder(rows[0]));
 });
 
-app.patch('/api/orders/:id', async (req, res) => {
+app.patch('/api/orders/:id', requireBarista, async (req, res) => {
   const status = req.body?.status;
   if (!['new', 'making', 'done'].includes(status)) {
     return res.status(400).json({ error: 'invalid status' });
@@ -86,7 +95,7 @@ app.patch('/api/orders/:id', async (req, res) => {
   res.json(serializeOrder(rows[0]));
 });
 
-app.delete('/api/orders/:id', async (req, res) => {
+app.delete('/api/orders/:id', requireBarista, async (req, res) => {
   await sql`DELETE FROM orders WHERE id = ${req.params.id}`;
   res.status(204).end();
 });
