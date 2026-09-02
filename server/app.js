@@ -22,6 +22,31 @@ function requireBarista(req, res, next) {
   next();
 }
 
+async function notifyTelegram(order) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+
+  const itemsText = order.items.map((i) => `${i.qty}× ${i.label}`).join('\n');
+  const payText = order.pay === 'qr' ? 'PromptPay QR' : 'Cash';
+  const text =
+    `☕ New order ${order.code}\n` +
+    `${order.name}\n` +
+    `${itemsText}\n` +
+    `${order.total}฿ · ${payText}` +
+    (order.note ? `\nNote: ${order.note}` : '');
+
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    });
+  } catch (e) {
+    console.error('telegram notify failed:', e);
+  }
+}
+
 function serializeOrder(row) {
   return {
     id: row.id,
@@ -79,8 +104,11 @@ app.post('/api/orders', async (req, res) => {
   const id = inserted.rows[0].id;
   const code = '#' + String(100 + (id % 900));
   const { rows } = await sql`UPDATE orders SET code = ${code} WHERE id = ${id} RETURNING *`;
+  const order = serializeOrder(rows[0]);
 
-  res.status(201).json(serializeOrder(rows[0]));
+  await notifyTelegram(order);
+
+  res.status(201).json(order);
 });
 
 app.patch('/api/orders/:id', requireBarista, async (req, res) => {
